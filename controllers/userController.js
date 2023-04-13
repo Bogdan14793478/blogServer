@@ -1,6 +1,7 @@
 const userService = require("../service/userService");
 const { validationResult } = require("express-validator");
 const ApiError = require("../exeptions/apiError");
+const userModel = require("../models/userModel");
 
 class UserController {
   async registration(req, res, next) {
@@ -11,7 +12,23 @@ class UserController {
       }
       const { email, password } = req.body;
       const userData = await userService.registration(email, password);
-      res.cookie("refreshToken", userData.refreshToken, {
+      res.cookie("refreshToken", userData.tokens.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      return res.json(userData);
+    } catch (e) {
+      next(e);
+      // return req.json(e);
+    }
+  }
+
+  async login(req, res, next) {
+    try {
+      const { email, password } = req.body;
+      const userData = await userService.login(email, password);
+      console.log(userData, "userData");
+      res.cookie("refreshToken", userData.tokens.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
@@ -21,15 +38,14 @@ class UserController {
     }
   }
 
-  async login(req, res, next) {
-    try {
-    } catch (e) {
-      next(e);
-    }
-  }
-
   async logout(req, res, next) {
     try {
+      console.log(req, "req");
+      const { refreshToken } = req.cookies;
+      console.log(refreshToken, "refreshToken");
+      const token = userService.logout(refreshToken);
+      res.clearCookie("refreshToken");
+      return res.json(token);
     } catch (e) {
       next(e);
     }
@@ -47,16 +63,24 @@ class UserController {
   }
 
   async refresh(req, res, next) {
-    // refresh token
     try {
+      const { refreshToken } = req.cookies;
+      console.log(refreshToken, "refreshToken");
+      const userData = await userService.refresh(refreshToken);
+      res.cookie("refreshToken", userData.tokens.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      return res.json(userData);
     } catch (e) {
       next(e);
     }
   }
 
-  async getUser(req, res, next) {
+  async getAllUsers(req, res, next) {
     try {
-      res.json(["123", "456"]);
+      const users = await userService.getUsers();
+      return res.json({ users, success: !!users });
     } catch (e) {
       next(e);
     }

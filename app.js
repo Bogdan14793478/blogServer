@@ -12,7 +12,12 @@ const router = require("./router/index");
 
 app.use(express.json()); // express по умолчанию не работает с json
 app.use(cookieParser()); //для работы res.cookie("refreshToken", userData.refreshToken, {});
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL,
+  })
+);
 app.use("/api", router);
 app.use(errorMiddleware);
 
