@@ -25,9 +25,10 @@ const start = async () => {
   try {
     // await sequelize.authenticate();
     // await sequelize.sync();
-    mongoose.set("strictQuery", false);
-    await mongoose.connect(process.env.DB_Mongo_URL);
+    // mongoose.set("strictQuery", false);
+    // await mongoose.connect(process.env.DB_Mongo_URL);
     app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+    console.log("Server started");
   } catch (e) {
     console.log(e);
   }
